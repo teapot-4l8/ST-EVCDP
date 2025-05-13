@@ -16,8 +16,8 @@ fn.set_seed(seed=2023, flag=True)
 
 # hyper params
 model_name = 'PAG'
-seq_l = 12
-pre_l = 6
+seq_l = 12  # lookback  60min
+pre_l = 6  # predict_time
 bs = 512
 p_epoch = 200
 n_epoch = 1000
@@ -29,7 +29,7 @@ is_pre_train = True
 # input data
 occ, prc, adj, col, dis, cap, time, inf = fn.read_dataset()
 adj_dense = torch.Tensor(adj)
-adj_dense_cuda = adj_dense.to(device)
+adj_dense_cuda = adj_dense.to(device)  # move a tensor to a specific device
 adj_sparse = adj_dense.to_sparse_coo().to(device)
 
 # dataset division
@@ -45,9 +45,9 @@ test_dataset = fn.CreateDataset(test_occupancy, test_price, seq_l, pre_l, device
 test_loader = DataLoader(test_dataset, batch_size=len(test_occupancy), shuffle=False)
 
 # training setting
-model = models.PAG(a_sparse=adj_sparse).to(device)  # init model
+# model = models.PAG(a_sparse=adj_sparse).to(device)  # init model
 # model = FGN().to(device)
-# model = baselines.LSTM(seq_l, 2).to(device)
+model = baselines.LSTM(seq_l, 2).to(device)
 # model = baselines.LstmGcn(seq_l, 2, adj_dense_cuda).to(device)
 optimizer = torch.optim.Adam(model.parameters(), weight_decay=0.00001)
 loss_function = torch.nn.MSELoss()
