@@ -15,12 +15,13 @@ device = torch.device("cuda:0" if use_cuda and torch.cuda.is_available() else "c
 fn.set_seed(seed=2023, flag=True)
 
 # hyper params
-model_name = 'PAG'
+model_name = 'VAR'
 seq_l = 12  # lookback  60min
 pre_l = 6  # predict_time
 bs = 512  # batch size 
 p_epoch = 200
 n_epoch = 1000
+# can directly affect the model's evaluation metrics,
 law_list = np.array([-1.48, -0.74])  # price elasticities of demand for EV charging. Recommend: up to 5 elements.
 is_train = True
 mode = 'completed'  # 'simplified' or 'completed'
@@ -47,10 +48,11 @@ test_loader = DataLoader(test_dataset, batch_size=len(test_occupancy), shuffle=F
 # training setting
 # model = models.PAG(a_sparse=adj_sparse).to(device)  # init model
 # model = FGN().to(device)
-model = baselines.LSTM(seq_l, 2).to(device)
-# model = baselines.LstmGcn(seq_l, 2, adj_dense_cuda).to(device)
 # model = models.PAG(a_sparse=adj_sparse).to(device)  # init model
-# model = baselines.VAR(node=247, seq=seq_l, feature=2).to(device)
+
+# model = baselines.LSTM(seq_l, 2).to(device)
+# model = baselines.LstmGcn(seq_l, 2, adj_dense_cuda).to(device)
+model = baselines.VAR(node=247, seq=seq_l, feature=2).to(device)
 # model = baselines.GCN(seq_l, 2, adj_dense_cuda).to(device)
 # model = baselines.LstmGat(seq_l, 2, adj_dense_cuda, adj_sparse).to(device)
 # model = baselines.TPA(seq_l, 2).to(device)

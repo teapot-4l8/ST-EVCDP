@@ -45,13 +45,6 @@ bs = 512
 ```
 
 ```
-Pre-training:   0% 0/200 [00:00<?, ?it/s]/content/ST-EVCDP/learner.py:37: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
-  temp_model = torch.load('./checkpoints' + '/meta_' + model_name + '_' + str(pre_l) + '_bs' + str(bs) + 'model.pt').to(device)
-Pre-training: 100% 200/200 [14:05<00:00,  4.23s/it]
-Fine-tuning: 100% 1000/1000 [20:35<00:00,  1.24s/it]
-/content/ST-EVCDP/main.py:99: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
-  model = torch.load('./checkpoints' + '/' + model_name + '_' + str(pre_l) + '_bs' + str(bs) + '_' + mode + '.pt')
-occupancy: torch.Size([1710, 247, 12]) price: torch.Size([1710, 247, 12]) label: torch.Size([1710, 247])
 MAPE: 0.4682727878862736   46.8
 MAE:0.06083133624522273    6.08
 MSE:0.00743108298071689    0.74
@@ -60,3 +53,40 @@ R2:0.0948750810238791
 RAE:0.4361698586889454     43.62
 ```
 
+## VAR
+```python
+seq_l = 12
+pre_l = 6
+bs = 512
+```
+```
+MAPE: 0.40690659516789074  40.7
+MAE:0.05923768872932746    5.92
+MSE:0.006351147416426651   6.35
+RMSE:0.07969408645832293   7.97
+R2:-0.02223890559664575   
+RAE:0.4247431655614768     42.47
+```
+
+## gcn
+```
+Pre-training:   0%|                                                                                  | 0/200 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "D:\_________________________PythonProject\ST-EVCDP\main_gcn.py", line 74, in <module>
+    model = learner.physics_informed_meta_learning(law_list, model, model_name, p_epoch, bs, train_occupancy, train_price, seq_l, pre_l, device, adj_dense)
+  File "D:\_________________________PythonProject\ST-EVCDP\learner.py", line 52, in physics_informed_meta_learning
+    predict = temp_model(occupancy, mix_prc)
+  File "D:\Python\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "D:\Python\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "D:\_________________________PythonProject\ST-EVCDP\baselines.py", line 66, in forward
+    x = self.gcn_l1(x)
+  File "D:\Python\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "D:\Python\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "D:\Python\Python\Python310\lib\site-packages\torch\nn\modules\linear.py", line 116, in forward
+    return F.linear(input, self.weight, self.bias)
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (1391104x1 and 11x11)
+```
