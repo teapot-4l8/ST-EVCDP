@@ -18,7 +18,7 @@ fn.set_seed(seed=2023, flag=True)
 model_name = 'PAG'
 seq_l = 12  # lookback  60min
 pre_l = 6  # predict_time
-bs = 512
+bs = 512  # batch size 
 p_epoch = 200
 n_epoch = 1000
 law_list = np.array([-1.48, -0.74])  # price elasticities of demand for EV charging. Recommend: up to 5 elements.
@@ -49,6 +49,15 @@ test_loader = DataLoader(test_dataset, batch_size=len(test_occupancy), shuffle=F
 # model = FGN().to(device)
 model = baselines.LSTM(seq_l, 2).to(device)
 # model = baselines.LstmGcn(seq_l, 2, adj_dense_cuda).to(device)
+# model = models.PAG(a_sparse=adj_sparse).to(device)  # init model
+# model = baselines.VAR(node=247, seq=seq_l, feature=2).to(device)
+# model = baselines.GCN(seq_l, 2, adj_dense_cuda).to(device)
+# model = baselines.LstmGat(seq_l, 2, adj_dense_cuda, adj_sparse).to(device)
+# model = baselines.TPA(seq_l, 2).to(device)
+# model = baselines.HSTGCN(seq_l, 2, adj_dense_cuda, adj_dense_cuda).to(device)
+# model = baselines.FGN(pre_length=1, seq_length=seq_l).to(device)
+
+
 optimizer = torch.optim.Adam(model.parameters(), weight_decay=0.00001)
 loss_function = torch.nn.MSELoss()
 valid_loss = 100
