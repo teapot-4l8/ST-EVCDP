@@ -15,9 +15,9 @@ device = torch.device("cuda:0" if use_cuda and torch.cuda.is_available() else "c
 fn.set_seed(seed=2023, flag=True)
 
 # hyper params
-model_name = 'VAR'
+model_name = 'PAG'
 seq_l = 12  # lookback  60min
-pre_l = 6  # predict_time
+pre_l = 6  # predict_time 3 6 9 12
 bs = 512  # batch size 
 p_epoch = 200
 n_epoch = 1000
@@ -48,11 +48,10 @@ test_loader = DataLoader(test_dataset, batch_size=len(test_occupancy), shuffle=F
 # training setting
 # model = models.PAG(a_sparse=adj_sparse).to(device)  # init model
 # model = FGN().to(device)
-# model = models.PAG(a_sparse=adj_sparse).to(device)  # init model
 
-# model = baselines.LSTM(seq_l, 2).to(device)
+model = baselines.LSTM(seq_l, 2).to(device)
 # model = baselines.LstmGcn(seq_l, 2, adj_dense_cuda).to(device)
-model = baselines.VAR(node=247, seq=seq_l, feature=2).to(device)
+# model = baselines.VAR(node=247, seq=seq_l, feature=2).to(device)
 # model = baselines.GCN(seq_l, 2, adj_dense_cuda).to(device)
 # model = baselines.LstmGat(seq_l, 2, adj_dense_cuda, adj_sparse).to(device)
 # model = baselines.TPA(seq_l, 2).to(device)
@@ -122,6 +121,14 @@ for j, data in enumerate(test_loader):
         label = label.cpu().detach().numpy()
         predict_list = np.concatenate((predict_list, predict), axis=0)
         label_list = np.concatenate((label_list, label), axis=0)
+
+# Modified evaluation for zone 42 only
+zone_42_predict = predict_list[1:, 42:43]  # Select only zone 42
+zone_42_label = label_list[1:, 42:43]      # Select only zone 42
+output_zone_42 = fn.metrics(test_pre=zone_42_predict, test_real=zone_42_label)
+result_list.append(output_zone_42)
+result_df = pd.DataFrame(columns=['MSE', 'RMSE', 'MAPE', 'RAE', 'MAE', 'R2'], data=result_list)
+result_df.to_csv('./results' + '/' + model_name + '_' + str(pre_l) + 'bs' + str(bs) + '_zone42.csv', encoding='gbk')
 
 output_no_noise = fn.metrics(test_pre=predict_list[1:, :], test_real=label_list[1:, :])
 result_list.append(output_no_noise)

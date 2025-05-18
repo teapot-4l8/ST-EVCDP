@@ -123,9 +123,18 @@ for pre_l in pre_list:
     pred_all = torch.cat(pred_list, dim=0)
     label_all = torch.cat(label_list, dim=0)
 
-    output_metrics = fn.metrics(pred_all.cpu(), label_all.cpu())
-    print(f'pre_l={pre_l}:', output_metrics)
-    results.append(output_metrics)
+    zone_42_predict = pred_all[1:, 42:43]  # Select only zone 42
+    zone_42_label = label_all[1:, 42:43]      # Select only zone 42
+    output_zone_42 = fn.metrics(test_pre=zone_42_predict, test_real=zone_42_label)
+
+    print(f'pre_l={pre_l}:', output_zone_42)
+    results.append(output_zone_42)
+
+    # Create DataFrame with results
+    result_list = []
+    result_list.append(output_zone_42)
+    result_df = pd.DataFrame(columns=['MSE', 'RMSE', 'MAPE', 'RAE', 'MAE', 'R2'], data=result_list)
+    result_df.to_csv('./results' + '/' + model_name + '_' + str(pre_l) + 'bs' + str(bs) + '_zone42.csv', encoding='gbk')
 
 df = pd.DataFrame(results, columns=['MSE', 'RMSE', 'MAPE', 'RAE', 'MAE', 'R2'])
 df.insert(0, 'pre_l', pre_list)
