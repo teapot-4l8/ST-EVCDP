@@ -15,7 +15,7 @@ device = torch.device("cuda:0" if use_cuda and torch.cuda.is_available() else "c
 fn.set_seed(seed=2023, flag=True)
 
 # hyper params
-model_name = 'LSTM'
+model_name = 'PAG'
 seq_l = 12  # lookback  60min
 pre_l = 12  # predict_time 3 6 9 12
 bs = 512  # batch size 
@@ -46,10 +46,10 @@ test_dataset = fn.CreateDataset(test_occupancy, test_price, seq_l, pre_l, device
 test_loader = DataLoader(test_dataset, batch_size=len(test_occupancy), shuffle=False)
 
 # training setting
-# model = models.PAG(a_sparse=adj_sparse).to(device)  # init model
+model = models.PAG(a_sparse=adj_sparse).to(device)  # init model
 # model = FGN().to(device)
 
-model = baselines.LSTM(seq_l, 2).to(device)
+# model = baselines.LSTM(seq_l, 2).to(device)
 # model = baselines.LstmGcn(seq_l, 2, adj_dense_cuda).to(device)
 # model = baselines.VAR(node=247, seq=seq_l, feature=2).to(device)
 # model = baselines.GCN(seq_l, 2, adj_dense_cuda).to(device)
