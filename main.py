@@ -15,9 +15,9 @@ device = torch.device("cuda:0" if use_cuda and torch.cuda.is_available() else "c
 fn.set_seed(seed=2023, flag=True)
 
 # hyper params
-model_name = 'PAG'
+model_name = 'LSTM'
 seq_l = 12  # lookback  60min
-pre_l = 6  # predict_time 3 6 9 12
+pre_l = 12  # predict_time 3 6 9 12
 bs = 512  # batch size 
 p_epoch = 200
 n_epoch = 1000
