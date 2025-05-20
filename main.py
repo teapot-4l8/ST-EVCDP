@@ -23,7 +23,7 @@ p_epoch = 200
 n_epoch = 1000
 # can directly affect the model's evaluation metrics,
 law_list = np.array([-1.48, -0.74])  # price elasticities of demand for EV charging. Recommend: up to 5 elements.
-is_train = True
+is_train = False
 mode = 'completed'  # 'simplified' or 'completed'
 is_pre_train = True
 
