@@ -3,7 +3,7 @@ import baselines
 import torch
 import numpy as np
 import pandas as pd
-import functions as fn
+import new_functions as fn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import models
@@ -16,12 +16,12 @@ device = torch.device("cuda:0" if use_cuda and torch.cuda.is_available() else "c
 fn.set_seed(seed=2023, flag=True)
 
 # hyper params
-model_name = 'PAG500'
+model_name = 'PAG'
 seq_l = 12  # lookback  60min
 pre_l = 6  # predict_time 3 6 9 12
 bs = 512  # batch size 
 p_epoch = 200
-n_epoch = 200
+n_epoch = 1000
 # can directly affect the model's evaluation metrics,
 law_list = np.array([-1.48, -0.74])  # price elasticities of demand for EV charging. Recommend: up to 5 elements.
 is_train = True
@@ -107,9 +107,9 @@ if is_train is True:
                 valid_loss = loss.item()
                 torch.save(model, './checkpoints' + '/' + model_name + '_' + str(pre_l) + '_bs' + str(bs) + '_' + mode + '.pt')
 
-model = torch.load('./checkpoints' + model_name + '_' + str(pre_l) + '_bs' + str(bs) + '_' + mode + '.pt')
+# model = torch.load('./checkpoints' + '/old_datasets_models/' + model_name + '_' + str(pre_l) + '_bs' + str(bs) + '_' + mode + '.pt')
 
-# model = torch.load('checkpoints\PAG_6_bs512_simplified.pt')
+model = torch.load('checkpoints\PAG_6_bs512_simplified.pt')
 
 # test
 model.eval()
@@ -132,12 +132,12 @@ zone_42_label = label_list[1:, 42:43]      # Select only zone 42
 output_zone_42 = fn.metrics(test_pre=zone_42_predict, test_real=zone_42_label)
 result_list.append(output_zone_42)
 result_df = pd.DataFrame(columns=['MSE', 'RMSE', 'MAPE', 'RAE', 'MAE', 'R2'], data=result_list)
-# result_df.to_csv('./results' + '/' + model_name + '_' + str(pre_l) + 'bs' + str(bs) + '_zone42.csv', encoding='gbk')
+result_df.to_csv('./results' + '/' + model_name + '_' + str(pre_l) + 'bs' + str(bs) + '_zone42.csv', encoding='gbk')
 
-# output_no_noise = fn.metrics(test_pre=predict_list[1:, :], test_real=label_list[1:, :])
-# result_list.append(output_no_noise)
-# result_df = pd.DataFrame(columns=['MSE', 'RMSE', 'MAPE', 'RAE', 'MAE', 'R2'], data=result_list)
-# result_df.to_csv('./results' + '/' + model_name + '_' + str(pre_l) + 'bs' + str(bs) + '.csv', encoding='gbk')
+output_no_noise = fn.metrics(test_pre=predict_list[1:, :], test_real=label_list[1:, :])
+result_list.append(output_no_noise)
+result_df = pd.DataFrame(columns=['MSE', 'RMSE', 'MAPE', 'RAE', 'MAE', 'R2'], data=result_list)
+result_df.to_csv('./results' + '/' + model_name + '_' + str(pre_l) + 'bs' + str(bs) + '.csv', encoding='gbk')
 
 # 绘制预测值和实际值曲线图
 plt.figure(figsize=(12, 6))
@@ -149,5 +149,5 @@ plt.ylabel('Occupancy Rate')
 plt.legend()
 plt.grid(True)
 
-# plt.savefig(f'./results/plots_all_zones/{model_name}_{pre_l}bs{bs}_zone42_plot.png', dpi=300, bbox_inches='tight')
+plt.savefig(f'./results/plots_all_zones/{model_name}_{pre_l}bs{bs}_zone42_plot.png', dpi=300, bbox_inches='tight')
 plt.show()

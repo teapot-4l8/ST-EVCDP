@@ -1,3 +1,19 @@
+# 图
+
+## old data
+
+
+
+## new data
+
+
+
+
+
+
+
+
+# old
 https://colab.research.google.com/drive/1FaFP-yG27fI4499IaKe2hooaarfoXU0I#scrollTo=gJOFq3gHnnwA
 
 RMSE | MAPE | RAE | MAE
