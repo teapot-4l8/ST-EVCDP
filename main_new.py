@@ -16,7 +16,7 @@ device = torch.device("cuda:0" if use_cuda and torch.cuda.is_available() else "c
 fn.set_seed(seed=2023, flag=True)
 
 # hyper params
-model_name = 'PAG'
+model_name = 'LSTM_EVdata'
 seq_l = 12  # lookback  60min
 pre_l = 6  # predict_time 3 6 9 12
 bs = 512  # batch size 
@@ -24,19 +24,19 @@ p_epoch = 200
 n_epoch = 1000
 # can directly affect the model's evaluation metrics,
 law_list = np.array([-1.48, -0.74])  # price elasticities of demand for EV charging. Recommend: up to 5 elements.
-is_train = True
+is_train = False
 mode = 'completed'  # 'simplified' or 'completed'
 is_pre_train = True
 
 # input data
-occ, prc, adj, col, dis, cap, time, inf = fn.read_dataset()
+occ, prc, adj, col, dis = fn.read_dataset()
 adj_dense = torch.Tensor(adj)
 adj_dense_cuda = adj_dense.to(device)  # move a tensor to a specific device
 adj_sparse = adj_dense.to_sparse_coo().to(device)
 
 # dataset division
-train_occupancy, valid_occupancy, test_occupancy = fn.division(occ, train_rate=0.6, valid_rate=0.2, test_rate=0.2)
-train_price, valid_price, test_price = fn.division(prc, train_rate=0.6, valid_rate=0.2, test_rate=0.2)
+train_occupancy, valid_occupancy, test_occupancy = fn.division(occ, train_rate=0.8, valid_rate=0.1, test_rate=0.1)
+train_price, valid_price, test_price = fn.division(prc, train_rate=0.8, valid_rate=0.1, test_rate=0.1)
 
 # data
 train_dataset = fn.CreateDataset(train_occupancy, train_price, seq_l, pre_l, device, adj_dense)
@@ -47,10 +47,10 @@ test_dataset = fn.CreateDataset(test_occupancy, test_price, seq_l, pre_l, device
 test_loader = DataLoader(test_dataset, batch_size=len(test_occupancy), shuffle=False)
 
 # training setting
-model = models.PAG(a_sparse=adj_sparse).to(device)  # init model
+# model = models.PAG(a_sparse=adj_sparse).to(device)  # init model
 # model = FGN().to(device)
 
-# model = baselines.LSTM(seq_l, 2).to(device)
+model = baselines.LSTM(seq_l, 2, node=275).to(device)
 # model = baselines.LstmGcn(seq_l, 2, adj_dense_cuda).to(device)
 # model = baselines.VAR(node=247, seq=seq_l, feature=2).to(device)
 # model = baselines.GCN(seq_l, 2, adj_dense_cuda).to(device)
@@ -107,9 +107,9 @@ if is_train is True:
                 valid_loss = loss.item()
                 torch.save(model, './checkpoints' + '/' + model_name + '_' + str(pre_l) + '_bs' + str(bs) + '_' + mode + '.pt')
 
-# model = torch.load('./checkpoints' + '/old_datasets_models/' + model_name + '_' + str(pre_l) + '_bs' + str(bs) + '_' + mode + '.pt')
+model = torch.load('./checkpoints/' +  model_name + '_' + str(pre_l) + '_bs' + str(bs) + '_' + mode + '.pt')
 
-model = torch.load('checkpoints\PAG_6_bs512_simplified.pt')
+# model = torch.load('checkpoints\PAG_EVdata_6_bs512_completed.pt')
 
 # test
 model.eval()
@@ -137,7 +137,14 @@ result_df.to_csv('./results' + '/' + model_name + '_' + str(pre_l) + 'bs' + str(
 output_no_noise = fn.metrics(test_pre=predict_list[1:, :], test_real=label_list[1:, :])
 result_list.append(output_no_noise)
 result_df = pd.DataFrame(columns=['MSE', 'RMSE', 'MAPE', 'RAE', 'MAE', 'R2'], data=result_list)
-result_df.to_csv('./results' + '/' + model_name + '_' + str(pre_l) + 'bs' + str(bs) + '.csv', encoding='gbk')
+# result_df.to_csv('./results' + '/' + model_name + '_' + str(pre_l) + 'bs' + str(bs) + '.csv', encoding='gbk')
+
+
+df = pd.DataFrame({
+    "Actual Occupancy": zone_42_label.ravel(),
+    "Predicted Occupancy": zone_42_predict.ravel(),
+})
+df.to_csv("ev_LSTM.csv", index=False)
 
 # 绘制预测值和实际值曲线图
 plt.figure(figsize=(12, 6))
@@ -149,5 +156,5 @@ plt.ylabel('Occupancy Rate')
 plt.legend()
 plt.grid(True)
 
-plt.savefig(f'./results/plots_all_zones/{model_name}_{pre_l}bs{bs}_zone42_plot.png', dpi=300, bbox_inches='tight')
+# plt.savefig(f'./results/plots_all_zones/{model_name}_{pre_l}bs{bs}_zone42_plot.png', dpi=300, bbox_inches='tight')
 plt.show()

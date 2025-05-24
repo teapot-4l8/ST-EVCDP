@@ -12,11 +12,11 @@ device = torch.device("cuda:0" if use_cuda and torch.cuda.is_available() else "c
 fn.set_seed(seed=2023, flag=True)
 
 # Hyperparams and model settings
-model_name = 'PAG'
+model_name = 'PAG100'
 seq_l = 12
 pre_l = 6
 bs = 512
-mode = 'simplified'
+mode = 'complited'
 
 # Load data
 occ, prc, adj, col, dis, cap, time, inf = fn.read_dataset()
@@ -33,7 +33,7 @@ test_loader = DataLoader(test_dataset, batch_size=len(test_occupancy), shuffle=F
 
 # Load trained model
 # model = torch.load(f'./checkpoints/old_datasets_models/{model_name}_{pre_l}_bs{bs}_{mode}.pt')
-model = torch.load(f'checkpoints\PAG_6_bs512_completed.pt')
+model = torch.load(f'checkpoints\PAG100_6_bs512_completed.pt')
 model.eval()
 
 predict_list = np.zeros([1, adj_dense.shape[1]])
@@ -49,12 +49,21 @@ for data in test_loader:
         label_list = np.concatenate((label_list, label), axis=0)
 
 # Only evaluate for zone 42
-zone_42_predict = predict_list[1:, 241:242]
-zone_42_label = label_list[1:, 241:242]
+zone_42_predict = predict_list[1:, 42:43]
+zone_42_label = label_list[1:, 42:43]
 output_zone_42 = fn.metrics(test_pre=zone_42_predict, test_real=zone_42_label)
 result_df = pd.DataFrame([output_zone_42], columns=['MSE', 'RMSE', 'MAPE', 'RAE', 'MAE', 'R2'])
 # result_df.to_csv(f'./results/{model_name}_{pre_l}bs{bs}_zone42.csv', encoding='gbk', index=False)
 
+zone_42_capacity = inf['count'][42]
+zone_42_label_raw = zone_42_label.ravel() * zone_42_capacity
+
+df = pd.DataFrame({
+    "Actual Occupancy": zone_42_label.ravel(),
+    "Predicted Occupancy": zone_42_predict.ravel(),
+    "zone_42_label_raw": zone_42_label_raw
+})
+# df.to_csv("occupancy_results.csv", index=False)
 
 # 绘制预测值和实际值曲线图
 plt.figure(figsize=(12, 6))

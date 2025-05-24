@@ -7,21 +7,19 @@ from sklearn.metrics import mean_squared_error,mean_absolute_error,r2_score,mean
 
 
 def read_dataset():
-    occ = pd.read_csv('datasets/occupancy.csv', index_col=0, header=0)
-    inf = pd.read_csv('newdatasets/information.csv', index_col=None, header=0)
-    prc = pd.read_csv('datasets/price.csv', index_col=0, header=0)
-    adj = pd.read_csv('newdatasets/adj.csv', index_col=0, header=0)  # check
-    dis = pd.read_csv('newdatasets/distance.csv', index_col=0, header=0)
-    time = pd.read_csv('datasets/time.csv', index_col=None, header=0)
-
+    occ = pd.read_csv('EVdatasets/occupancy.csv', index_col=0, header=0)
+    e_prc = pd.read_csv('EVdatasets/e_price.csv', index_col=0, header=0)  # electricity price
+    s_prc = pd.read_csv('EVdatasets/s_price.csv', index_col=0, header=0)  # service price
+    prc = e_prc + s_prc
+    adj = pd.read_csv('EVdatasets/adj_filter.csv', index_col=0, header=0)  # check
+    dis = pd.read_csv('EVdatasets/zone_dist.csv', index_col=0, header=0)
     col = occ.columns
-    cap = np.array(inf['count'], dtype=float).reshape(1, -1)  # parking_capability
-    occ = np.array(occ, dtype=float) / cap
+    occ = np.array(occ, dtype=float)
     prc = np.array(prc, dtype=float)
     adj = np.array(adj, dtype=float)
     dis = np.array(dis, dtype=float)
-    time = pd.to_datetime(time, dayfirst=True)
-    return occ, prc, adj, col, dis, cap, time, inf
+    # time = pd.to_datetime(time, dayfirst=True)
+    return occ, prc, adj, col, dis
 
 
 # ---------data transform-----------

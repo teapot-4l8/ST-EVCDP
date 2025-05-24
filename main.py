@@ -8,7 +8,6 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 import models
 import learner
-import matplotlib.pyplot as plt
 
 # system configuration
 use_cuda = True
@@ -16,15 +15,15 @@ device = torch.device("cuda:0" if use_cuda and torch.cuda.is_available() else "c
 fn.set_seed(seed=2023, flag=True)
 
 # hyper params
-model_name = 'PAG500'
+model_name = 'PAG'
 seq_l = 12  # lookback  60min
-pre_l = 6  # predict_time 3 6 9 12
+pre_l = 12  # predict_time 3 6 9 12
 bs = 512  # batch size 
 p_epoch = 200
-n_epoch = 200
+n_epoch = 1000
 # can directly affect the model's evaluation metrics,
 law_list = np.array([-1.48, -0.74])  # price elasticities of demand for EV charging. Recommend: up to 5 elements.
-is_train = True
+is_train = False
 mode = 'completed'  # 'simplified' or 'completed'
 is_pre_train = True
 
